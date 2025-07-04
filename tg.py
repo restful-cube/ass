@@ -184,13 +184,12 @@ def apply_deep_fry_effect(image_bytes: bytes) -> BytesIO:
         enhancer = ImageEnhance.Brightness(img)
         img = enhancer.enhance(brightness_factor)
 
-        # 2. Increase Contrast
+        # Corrected lines:
         enhancer = ImageEnhance.Contrast(img)
-        img = img.enhance(contrast_factor)
+        img = enhancer.enhance(contrast_factor) # <--- Corrected!
 
-        # 3. Increase Saturation
         enhancer = ImageEnhance.Color(img)
-        img = img.enhance(saturation_factor)
+        img = enhancer.enhance(saturation_factor) # <--- Corrected!
 
         # 4. Sharpen
         for _ in range(sharpen_repetitions):
@@ -237,7 +236,7 @@ def add_meme_text(image_stream: BytesIO, top_text: str = "", bottom_text: str = 
     # Define font properties
     # Try to load Impact font. If not found, use a default sans-serif font
     try:
-        font = ImageFont.truetype("Impact.ttf", font_size)
+        font = ImageFont.truetype(os.path.join(os.path.dirname(__file__), "Impact.ttf"), font_size)
     except IOError:
         logging.warning("Impact.ttf not found, falling back to default font.")
         # Fallback for local testing or systems without Impact
