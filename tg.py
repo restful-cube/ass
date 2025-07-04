@@ -289,7 +289,7 @@ def add_meme_text(image_stream: BytesIO, top_text: str = "", bottom_text: str = 
         text_height = bbox[3] - bbox[1]
 
         x = (width - text_width) / 2
-        y = height - text_height - int(height * 0.01) # Small padding from bottom, also scaled
+        y = height - text_height - int(height * 0.03) # Small padding from bottom, also scaled
         draw_text_with_stroke(draw, bottom_text, (x, y), font, text_color, stroke_color, stroke_width)
 
     output_stream = BytesIO()
