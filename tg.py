@@ -236,9 +236,9 @@ def add_meme_text(image_stream: BytesIO, top_text: str = "", bottom_text: str = 
     # Define font properties
     # Try to load Impact font. If not found, use a default sans-serif font
     try:
-        font = ImageFont.truetype(os.path.join(os.path.dirname(__file__), "Impact.ttf"), font_size)
+        font = ImageFont.truetype(os.path.join(os.path.dirname(__file__), "impact.ttf"), font_size)
     except IOError:
-        logging.warning("Impact.ttf not found, falling back to default font.")
+        logging.warning("impact.ttf not found, falling back to default font.")
         # Fallback for local testing or systems without Impact
         # Using a default system font that's usually available
         if os.path.exists("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"):
