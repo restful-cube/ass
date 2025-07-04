@@ -138,7 +138,83 @@ def combine_images_side_by_side(image1_path: str, image2_path: str) -> BytesIO:
     except Exception as e:
         logging.error(f"Error combining images: {e}", exc_info=True)
         return None
-    def add_meme_text(image_stream: BytesIO, top_text: str = "", bottom_text: str = "") -> BytesIO:
+
+# NEW FUNCTION FOR DEEP FRYING with randomized levels
+def apply_deep_fry_effect(image_bytes: bytes) -> BytesIO:
+    """
+    Applies a 'deep-fried' meme effect to an image with randomized intensity,
+    ensuring a minimum intensity level for each effect.
+    :param image_bytes: The image data as bytes (e.g., from OpenAI API).
+    :return: A BytesIO object containing the deep-fried image as PNG.
+    """
+    try:
+        img = Image.open(BytesIO(image_bytes)).convert("RGB")
+
+        # --- Randomize Effect Intensities with a minimum "30" level ---
+        # Brightness: Minimum 1.3 (30% brighter than original) to 3.0 (very bright)
+        brightness_factor = random.uniform(1.3, 3.0)
+
+        # Contrast: Minimum 1.3 (30% more contrast) to 4.5 (very high contrast)
+        contrast_factor = random.uniform(1.3, 4.5)
+
+        # Saturation: Minimum 1.3 (30% more saturation) to 4.0 (very high saturation)
+        saturation_factor = random.uniform(1.3, 4.0)
+
+        # Sharpen Repetitions: Minimum 1 to 4 times (ensures some sharpening)
+        sharpen_repetitions = random.randint(1, 4)
+
+        # JPEG Quality: Lower number means HIGHER intensity of fry effect (more artifacts)
+        # So, 'lowest intensity 30' means the HIGHEST quality number allowed is 30,
+        # meaning less intense compression. We'll set the range from 10 (very fried) to 40 (less fried).
+        jpeg_quality = random.randint(10, 40)
+
+        # Compression Repetitions: Minimum 3 to 15 times (ensures cumulative artifacting)
+        compression_repetitions = random.randint(3, 15)
+
+        logging.info(f"Applying deep-fry with randomized settings: "
+                     f"Brightness={brightness_factor:.2f}, "
+                     f"Contrast={contrast_factor:.2f}, "
+                     f"Saturation={saturation_factor:.2f}, "
+                     f"Sharpen Repeats={sharpen_repetitions}, "
+                     f"JPEG Quality={jpeg_quality}, "
+                     f"Compression Repeats={compression_repetitions}")
+
+        # --- Apply the "Deep Fried" effects with randomized values ---
+        # 1. Increase Brightness
+        enhancer = ImageEnhance.Brightness(img)
+        img = enhancer.enhance(brightness_factor)
+
+        # 2. Increase Contrast
+        enhancer = ImageEnhance.Contrast(img)
+        img = img.enhance(contrast_factor)
+
+        # 3. Increase Saturation
+        enhancer = ImageEnhance.Color(img)
+        img = img.enhance(saturation_factor)
+
+        # 4. Sharpen
+        for _ in range(sharpen_repetitions):
+            img = img.filter(ImageFilter.SHARPEN)
+
+        # 5. JPEG Compression (Repeated) - Most crucial for "deep-fried"
+        for _ in range(compression_repetitions):
+            temp_stream = BytesIO()
+            img.save(temp_stream, format="JPEG", quality=jpeg_quality)
+            temp_stream.seek(0)
+            img = Image.open(temp_stream).convert("RGB")
+
+        output_stream = BytesIO()
+        img.save(output_stream, format="PNG")
+        output_stream.seek(0)
+        logging.info("Successfully applied randomized deep-fry effect.")
+        return output_stream
+
+    except Exception as e:
+        logging.error(f"Error applying randomized deep-fry effect: {e}", exc_info=True)
+        return None
+
+# NEW FUNCTION FOR ADDING MEME TEXT (Correctly placed and indented)
+def add_meme_text(image_stream: BytesIO, top_text: str = "", bottom_text: str = "") -> BytesIO:
     """
     Adds Impact font text with black fill and a white stroke to the top and bottom
     of the image, with text size scaled to 8% of the image height.
@@ -221,150 +297,7 @@ def combine_images_side_by_side(image1_path: str, image2_path: str) -> BytesIO:
     img.save(output_stream, format="PNG")
     output_stream.seek(0)
     return output_stream
-    
-# NEW FUNCTION FOR DEEP FRYING with randomized levels
-def apply_deep_fry_effect(image_bytes: bytes) -> BytesIO:
-    """
-    Applies a 'deep-fried' meme effect to an image with randomized intensity,
-    ensuring a minimum intensity level for each effect.
-    :param image_bytes: The image data as bytes (e.g., from OpenAI API).
-    :return: A BytesIO object containing the deep-fried image as PNG.
-    """
-    try:
-        img = Image.open(BytesIO(image_bytes)).convert("RGB")
 
-        # --- Randomize Effect Intensities with a minimum "30" level ---
-        # Brightness: Minimum 1.3 (30% brighter than original) to 3.0 (very bright)
-        brightness_factor = random.uniform(1.3, 3.0)
-
-        # Contrast: Minimum 1.3 (30% more contrast) to 4.5 (very high contrast)
-        contrast_factor = random.uniform(1.3, 4.5)
-
-        # Saturation: Minimum 1.3 (30% more saturation) to 4.0 (very high saturation)
-        saturation_factor = random.uniform(1.3, 4.0)
-
-        # Sharpen Repetitions: Minimum 1 to 4 times (ensures some sharpening)
-        sharpen_repetitions = random.randint(1, 4)
-
-        # JPEG Quality: Lower number means HIGHER intensity of fry effect (more artifacts)
-        # So, 'lowest intensity 30' means the HIGHEST quality number allowed is 30,
-        # meaning less intense compression. We'll set the range from 10 (very fried) to 40 (less fried).
-        jpeg_quality = random.randint(10, 40)
-
-        # Compression Repetitions: Minimum 3 to 15 times (ensures cumulative artifacting)
-        compression_repetitions = random.randint(3, 15)
-
-        logging.info(f"Applying deep-fry with randomized settings: "
-                     f"Brightness={brightness_factor:.2f}, "
-                     f"Contrast={contrast_factor:.2f}, "
-                     f"Saturation={saturation_factor:.2f}, "
-                     f"Sharpen Repeats={sharpen_repetitions}, "
-                     f"JPEG Quality={jpeg_quality}, "
-                     f"Compression Repeats={compression_repetitions}")
-
-        # --- Apply the "Deep Fried" effects with randomized values ---
-        # 1. Increase Brightness
-        enhancer = ImageEnhance.Brightness(img)
-        img = enhancer.enhance(brightness_factor)
-
-        # 2. Increase Contrast
-        enhancer = ImageEnhance.Contrast(img)
-        img = enhancer.enhance(contrast_factor)
-
-        # 3. Increase Saturation
-        enhancer = ImageEnhance.Color(img)
-        img = enhancer.enhance(saturation_factor)
-
-        # 4. Sharpen
-        for _ in range(sharpen_repetitions):
-            img = img.filter(ImageFilter.SHARPEN)
-
-        # 5. JPEG Compression (Repeated) - Most crucial for "deep-fried"
-        for _ in range(compression_repetitions):
-            temp_stream = BytesIO()
-            img.save(temp_stream, format="JPEG", quality=jpeg_quality)
-            temp_stream.seek(0)
-            img = Image.open(temp_stream).convert("RGB")
-
-        output_stream = BytesIO()
-        img.save(output_stream, format="PNG")
-        output_stream.seek(0)
-        logging.info("Successfully applied randomized deep-fry effect.")
-        return output_stream
-
-    except Exception as e:
-        logging.error(f"Error applying randomized deep-fry effect: {e}", exc_info=True)
-        return None
-
-# NEW FUNCTION FOR ADDING MEME TEXT
-def add_meme_text(image_stream: BytesIO, top_text: str = "", bottom_text: str = "") -> BytesIO:
-    """
-    Adds Impact font text with black fill and a white stroke to the top and bottom
-    of the image.
-    :param image_stream: BytesIO object containing the image.
-    :param top_text: Text to display at the top.
-    :param bottom_text: Text to display at the bottom.
-    :return: BytesIO object with the image and text.
-    """
-    img = Image.open(image_stream).convert("RGB")
-    draw = ImageDraw.Draw(img)
-    width, height = img.size
-
-    # Define font properties
-    font_size = 120
-    # Try to load Impact font. If not found, use a default sans-serif font
-    try:
-        font = ImageFont.truetype("Impact.ttf", font_size)
-    except IOError:
-        logging.warning("Impact.ttf not found, falling back to default font.")
-        font = ImageFont.load_default() # Fallback for local testing or systems without Impact
-        # Adjust size for default font to be roughly similar
-        font_size = 80 # default font is smaller, so adjust its visual size
-        font = ImageFont.truetype("arial.ttf" if os.path.exists("arial.ttf") else "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", font_size)
-
-
-    text_color = (0, 0, 0)  # Black fill
-    stroke_color = (255, 255, 255) # White stroke
-    stroke_width = 5 # 5px stroke
-
-    # Function to draw text with stroke
-    def draw_text_with_stroke(draw_obj, text, position, font, text_fill, stroke_fill, stroke_width):
-        x, y = position
-        # Draw stroke
-        for dx in range(-stroke_width, stroke_width + 1):
-            for dy in range(-stroke_width, stroke_width + 1):
-                if dx * dx + dy * dy <= stroke_width * stroke_width: # Circle stroke
-                    draw_obj.text((x + dx, y + dy), text, font=font, fill=stroke_fill)
-        # Draw main text
-        draw_obj.text(position, text, font=font, fill=text_fill)
-
-
-    # Calculate text position for top text
-    if top_text:
-        # Get text bounding box size
-        bbox = draw.textbbox((0,0), top_text, font=font)
-        text_width = bbox[2] - bbox[0]
-        text_height = bbox[3] - bbox[1]
-
-        x = (width - text_width) / 2
-        y = 10 # Small padding from top
-        draw_text_with_stroke(draw, top_text, (x, y), font, text_color, stroke_color, stroke_width)
-
-    # Calculate text position for bottom text
-    if bottom_text:
-        # Get text bounding box size
-        bbox = draw.textbbox((0,0), bottom_text, font=font)
-        text_width = bbox[2] - bbox[0]
-        text_height = bbox[3] - bbox[1]
-
-        x = (width - text_width) / 2
-        y = height - text_height - 10 # Small padding from bottom
-        draw_text_with_stroke(draw, bottom_text, (x, y), font, text_color, stroke_color, stroke_width)
-
-    output_stream = BytesIO()
-    img.save(output_stream, format="PNG")
-    output_stream.seek(0)
-    return output_stream
 
 # --- Prompt Definitions ---
 AI_DISCLAIMER_PROMPT = "This is an AI-generated image. Please apply the following filter, maintaining the core subject but altering the style as described."
@@ -675,9 +608,7 @@ async def process_bogged_image(update: Update, context: ContextTypes.DEFAULT_TYP
         logging.error(f"Unexpected error when sending photo: {e}", exc_info=True)
         await query.message.reply_text("An unexpected error occurred while sending the result.")
 
-# tg.py
 
-# ... (imports and other functions are the same) ...
 async def process_share_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     Handles the 'Share on X' button, gets the URL back from the API,
